@@ -49,6 +49,6 @@ jobs:
           path: ~/.cache/cargo-xwinbuild
           key: xwin-${{ env.XWIN_ARCH }}-${{ env.XWIN_VARIANT }}-${{ env.XWIN_VERSION }}
       - name: install cargo-xwinbuild
-        run: cargo install --version ${{ env.CARGO_XWINBUILD_VERSION }} cargo-xwinbuild
+        run: file ~/.cargo/bin/cargo-xwinbuild || cargo install --version ${{ env.CARGO_XWINBUILD_VERSION }} cargo-xwinbuild
       - name: build blake3
         run: cargo xwinbuild --target x86_64-pc-windows-msvc
