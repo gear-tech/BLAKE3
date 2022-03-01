@@ -49,9 +49,5 @@ jobs:
           key: xwin-${{ env.XWIN_ARCH }}-${{ env.XWIN_VARIANT }}-${{ env.XWIN_VERSION }}
       - name: install cargo-xwinbuild
         run: cargo install cargo-xwinbuild
-      - name: list cache dir before
-        run: ls -al ~/.cache/cargo-xwinbuild || true
       - name: build blake3
         run: cargo xwinbuild --target x86_64-pc-windows-msvc
-      - name: list cache dir after
-        run: ls -al ~/.cache/cargo-xwinbuild
