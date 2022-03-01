@@ -20,7 +20,7 @@ jobs:
       XWIN_ARCH: "x86_64"
       XWIN_VARIANT: "desktop"
       XWIN_VERSION: "16"
-      XWIN_CACHE_DIR: "${{ env.HOME }}/.cargo-xwinbuild"
+      XWIN_CACHE_DIR: "$HOME/.cargo-xwinbuild"
     strategy:
       fail-fast: false
     steps:
