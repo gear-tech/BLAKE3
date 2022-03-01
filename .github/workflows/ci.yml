@@ -31,12 +31,14 @@ jobs:
           override: true
       - name: install dependencies
         run:  sudo apt-get update -y && sudo apt-get install -y clang-tools
+      - name: symlink clang-cl
+        run: sudo ln -s /usr/bin/clang-cl-[1-9][0-9] /usr/bin/clang-cl
       - name: cache cargo-xwinbuild
         id: cache-cargo-xwinbuild
         uses: actions/cache@v2
         with:
           path: ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/.cargo/bin/cargo-xwinbuild') }}
+          key: ${{ runner.os }}-cargo-xwinbuild
       - name: cache xwin
         id: cache-xwin
         uses: actions/cache@v2
