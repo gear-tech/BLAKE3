@@ -20,7 +20,7 @@ jobs:
       XWIN_ARCH: "x86_64"
       XWIN_VARIANT: "desktop"
       XWIN_VERSION: "16"
-      XWIN_CACHE_DIR: ${{ env.HOME }}/.cargo-xwinbuild
+      XWIN_CACHE_DIR: ${{ github.workspace }}/.cargo-xwinbuild
     strategy:
       fail-fast: false
     steps:
@@ -34,7 +34,7 @@ jobs:
         id: cache-cargo-xwinbuild
         uses: actions/cache@v2
         with:
-          path: ~/.cargo-xwinbuild
+          path: ${{ github.workspace }}/.cargo-xwinbuild
           key: ${{ env.XWIN_ARCH }}-${{ env.XWIN_VARIANT }}-${{ env.XWIN_VERSION }}
       - name: install cargo-xwinbuild
         run: cargo install cargo-xwinbuild
