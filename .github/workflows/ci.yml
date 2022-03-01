@@ -30,9 +30,11 @@ jobs:
           target: x86_64-pc-windows-msvc
           override: true
       - name: install dependencies
-        run:  sudo apt-get update -y && sudo apt-get install -y clang-tools llvm
+        run:  sudo apt-get update -y && sudo apt-get install -y clang-tools llvm lld
       - name: symlink clang-cl
         run: sudo ln -s /usr/bin/clang-cl-[1-9][0-9] /usr/bin/clang-cl
+      - name: symlink lld-link
+        run: sudo ln -s /usr/bin/lld /usr/bin/lld-link
       - name: cache cargo-xwinbuild
         id: cache-cargo-xwinbuild
         uses: actions/cache@v2
