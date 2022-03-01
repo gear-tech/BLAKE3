@@ -29,12 +29,10 @@ jobs:
           toolchain: stable
           target: x86_64-pc-windows-msvc
           override: true
-      - name: install dependencies
-        run:  sudo apt-get update -y && sudo apt-get install -y clang-tools llvm lld
-      - name: symlink clang-cl
-        run: sudo ln -s /usr/bin/clang-cl-[1-9][0-9] /usr/bin/clang-cl
-      - name: symlink lld-link
-        run: sudo ln -s /usr/bin/lld /usr/bin/lld-link
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
+        with:
+          version: "13"
       - name: cache cargo-xwinbuild
         id: cache-cargo-xwinbuild
         uses: actions/cache@v2
