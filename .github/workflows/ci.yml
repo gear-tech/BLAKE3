@@ -20,7 +20,7 @@ jobs:
       XWIN_ARCH: "x86_64"
       XWIN_VARIANT: "desktop"
       XWIN_VERSION: "16"
-      XWIN_CACHE_DIR: ~/.cargo-xwinbuild
+      XWIN_CACHE_DIR: "${{ env.HOME }}/.cargo-xwinbuild"
     strategy:
       fail-fast: false
     steps:
@@ -30,15 +30,16 @@ jobs:
           toolchain: stable
           target: x86_64-pc-windows-msvc
           override: true
-      - run: cargo install cargo-xwinbuild
-      - name: cache cargo-xwin
+      - name: cache cargo-xwinbuild
         id: cache-cargo-xwinbuild
         uses: actions/cache@v2
         with:
           path: ~/.cargo-xwinbuild
           key: ${{ env.XWIN_ARCH }}-${{ env.XWIN_VARIANT }}-${{ env.XWIN_VERSION }}
+      - name: install cargo-xwinbuild
+        run: cargo install cargo-xwinbuild
       - name: list cache dir before
-        run: ls -al "$XWIN_CACHE_DIR"
+        run: ls -al "$XWIN_CACHE_DIR" || true
       - name: build blake3
         run: cargo xwinbuild --target x86_64-pc-windows-msvc
       - name: build b3sum
