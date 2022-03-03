@@ -29,7 +29,7 @@ jobs:
         with:
           toolchain: stable
           target: x86_64-pc-windows-msvc
-          override: true
+          default: true
       - name: install dependencies
         run:  sudo apt-get update -y && sudo apt-get install -y clang-tools llvm lld
       - name: symlink clang-cl
