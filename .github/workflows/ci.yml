@@ -32,21 +32,13 @@ jobs:
           override: true
 
       # Dependencies
-      - name: install clang dependencies
+      - name: install dependencies
         run: | 
-          sudo apt-get update -y && sudo apt-get install -y clang-tools llvm lld
+          sudo apt-get update -y
+          sudo apt-get install --quiet -y clang-tools llvm lld 
           sudo ln -s /usr/bin/clang-cl-[1-9][0-9] /usr/bin/clang-cl
           sudo ln -s /usr/bin/lld /usr/bin/lld-link
-      - name: install wine
-        env:
-          KEYRINGS: "/usr/local/share/keyrings"
-        run: |
-          sudo mkdir -p $KEYRINGS
-          curl --fail https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor | sudo tee $KEYRINGS/winehq.gpg > /dev/null
-          echo "deb [signed-by=$KEYRINGS/winehq.gpg] https://dl.winehq.org/wine-builds/debian/ $UBUNTU_VERSION focal" | \
-          sudo tee /etc/apt/sources.list.d/winehq.list > /dev/null;
-          sudo apt-get update --quiet -y
-          sudo apt-get install --quiet --no-install-recommends -y winehq-stable winetricks
+          sudo apt-get install --quiet --no-install-recommends -y wine-stable winetricks
           winetricks nocrashdialog
 
       # Cache
