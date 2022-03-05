@@ -41,7 +41,7 @@ jobs:
         env:
           KEYRINGS: "/usr/local/share/keyrings"
         run: |
-          mkdir -p $KEYRINGS
+          sudo mkdir -p $KEYRINGS
           curl --fail https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor | sudo tee $KEYRINGS/winehq.gpg > /dev/null
           echo "deb [signed-by=$KEYRINGS/winehq.gpg] https://dl.winehq.org/wine-builds/debian/ $UBUNTU_VERSION focal" | \
           sudo tee /etc/apt/sources.list.d/winehq.list > /dev/null;
