@@ -20,7 +20,7 @@ jobs:
       XWIN_ARCH: "x86_64"
       XWIN_VARIANT: "desktop"
       XWIN_VERSION: "16"
-      CARGO_XWINBUILD_VERSION: "0.3.1-beta.1"
+      CARGO_XWINBUILD_VERSION: "0.4.0"
     strategy:
       fail-fast: false
     steps:
@@ -30,12 +30,25 @@ jobs:
           toolchain: stable
           target: x86_64-pc-windows-msvc
           override: true
-      - name: install dependencies
-        run:  sudo apt-get update -y && sudo apt-get install -y clang-tools llvm lld
-      - name: symlink clang-cl
-        run: sudo ln -s /usr/bin/clang-cl-[1-9][0-9] /usr/bin/clang-cl
-      - name: symlink lld-link
-        run: sudo ln -s /usr/bin/lld /usr/bin/lld-link
+
+      # Dependencies
+      - name: install clang dependencies
+        run: | 
+          sudo apt-get update -y && sudo apt-get install -y clang-tools llvm lld
+          sudo ln -s /usr/bin/clang-cl-[1-9][0-9] /usr/bin/clang-cl
+          sudo ln -s /usr/bin/lld /usr/bin/lld-link
+      - name: install wine
+        env:
+          KEYRINGS: "/usr/local/share/keyrings"
+        run: | 
+          curl --fail https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor | sudo tee $KEYRINGS/winehq.gpg
+          echo "deb [signed-by=$KEYRINGS/winehq.gpg] https://dl.winehq.org/wine-builds/debian/ $UBUNTU_VERSION focal" | \
+          sudo tee /etc/apt/sources.list.d/winehq.list;
+          sudo apt-get update -y
+          sudo apt-get install --quiet --no-install-recommends -y winehq-stable winetricks
+          winetricks nocrashdialog
+
+      # Cache
       - name: cache cargo-xwinbuild
         id: cache-cargo-xwinbuild
         uses: actions/cache@v2
@@ -50,8 +63,29 @@ jobs:
           key: xwin-${{ env.XWIN_ARCH }}-${{ env.XWIN_VARIANT }}-${{ env.XWIN_VERSION }}
       - name: install cargo-xwinbuild
         run: ls ~/.cargo/bin/cargo-xwinbuild || cargo install --version ${{ env.CARGO_XWINBUILD_VERSION }} cargo-xwinbuild
+
+      # Build
       - name: build blake3
-        run: cargo xwinbuild --target x86_64-pc-windows-msvc -vv
+        run: cargo xwinbuild --target x86_64-pc-windows-msvc
       - name: build b3sum
-        run: cargo xwinbuild --target x86_64-pc-windows-msvc -vv
+        run: cargo xwinbuild --target x86_64-pc-windows-msvc
+        working-directory: ./b3sum
+
+      # Test
+      # Default tests plus Rayon and RustCrypto trait implementations.
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=rayon,traits-preview
+      # Same but with only one thread in the Rayon pool. This can find deadlocks.
+      - name: "again with RAYON_NUM_THREADS=1"
+        env:
+          RAYON_NUM_THREADS: 1
+        run: cargo xwintest --target x86_64-pc-windows-msvc --features=rayon,traits-preview
+      # no_std tests.
+      - name: no_std tests
+        run: cargo xwintest --no-default-features
+      # Test b3sum.
+      - name: test b3sum
+        run: cargo xwintest --target x86_64-pc-windows-msvc
+        working-directory: ./b3sum
+      - name: test b3sum --no-default-features
+        run: cargo xwintest --target x86_64-pc-windows-msvc --no-default-features
         working-directory: ./b3sum
