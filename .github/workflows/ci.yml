@@ -143,9 +143,9 @@ jobs:
       - name: test C bindings assembly
         run: cargo xwintest --target x86_64-pc-windows-msvc
         working-directory: ./c/blake3_c_rust_bindings
-      - name: test C bindings intrinsics
-        run: cargo xwintest --target x86_64-pc-windows-msvc --features=prefer_intrinsics
-        working-directory: ./c/blake3_c_rust_bindings
+      #- name: test C bindings intrinsics
+      #  run: cargo xwintest --target x86_64-pc-windows-msvc --features=prefer_intrinsics
+      #  working-directory: ./c/blake3_c_rust_bindings
       # Reference impl doc test.
       - name: reference impl doc test
         run: cargo xwintest --target x86_64-pc-windows-msvc
