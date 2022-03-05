@@ -76,6 +76,48 @@ jobs:
       # no_std tests.
       - name: no_std tests
         run: cargo xwintest --no-default-features
+
+      # A matrix of different test settings:
+      # - debug vs release
+      # - assembly vs Rust+C intrinsics vs pure Rust intrinsics
+      # - different levels of SIMD support
+      #
+      # Full SIMD support.
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=prefer_intrinsics
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=pure
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features= --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=prefer_intrinsics --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=pure --release
+      # No AVX-512.
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,prefer_intrinsics
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,pure
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512 --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,prefer_intrinsics --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,pure --release
+      # No AVX2.
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,prefer_intrinsics
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,pure
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2 --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,prefer_intrinsics --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,pure --release
+      # No SSE4.1
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,prefer_intrinsics
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,pure
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41 --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,prefer_intrinsics --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,pure --release
+      # No SSE2
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,no_sse2
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,no_sse2,prefer_intrinsics
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,no_sse2,pure
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,no_sse2 --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,no_sse2,prefer_intrinsics --release
+      - run: cargo xwintest --target x86_64-pc-windows-msvc --features=no_avx512,no_avx2,no_sse41,no_sse2,pure --release
+
       # Test benchmarks. RUSTC_BOOTSTRAP=1 lets this run on non-nightly toolchains.
       - run: cargo xwintest --target x86_64-pc-windows-msvc --benches --features=rayon
         env:
