@@ -20,8 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         target: [
-          { "os": "ubuntu-latest",  "toolchain": "x86_64-unknown-linux-gnu", "cargo_test": "cargo test",     "name": "Linux GNU" },
-          { "os": "ubuntu-latest",  "toolchain": "x86_64-pc-windows-msvc",   "cargo_test": "cargo xwintest", "name": "Linux - Windows MSVC" },
+          { "os": "ubuntu-latest",  "toolchain": "x86_64-unknown-linux-gnu", "cargo_cmd": "cargo ",     "name": "Linux GNU" },
+          { "os": "ubuntu-latest",  "toolchain": "x86_64-pc-windows-msvc",   "cargo_cmd": "cargo xwin", "name": "Linux - Windows MSVC" },
         ]
         channel: [stable] # , beta, nightly
     env: 
@@ -43,9 +43,10 @@ jobs:
     - uses: actions-rs/toolchain@v1
       if: ${{ matrix.target.name == 'Linux - Windows MSVC' }}
       with:
-          toolchain: ${{ matrix.channel }}
-          target: ${{ matrix.target.toolchain }}
-          override: true
+        toolchain: ${{ matrix.channel }}
+        target: ${{ matrix.target.toolchain }}
+        profile: minimal
+        override: true
 
 
     - name: install dependencies
@@ -80,12 +81,12 @@ jobs:
     # Print the compiler version, for debugging.
     - name: print compiler version
       if: ${{ matrix.target.name != 'Linux - Windows MSVC' }}
-      run: cargo run --quiet
+      run: ${{ matrix.target.cargo_cmd }}run --quiet
       working-directory: ./tools/compiler_version
     # Print out instruction set support, for debugging.
     - name: print instruction set support
       if: ${{ matrix.target.name != 'Linux - Windows MSVC' }}
-      run: cargo run --quiet
+      run: ${{ matrix.target.cargo_cmd }}run --quiet
       working-directory: ./tools/instruction_set_support
     - name: print instruction set support
       if: ${{ matrix.target.name == 'Linux - Windows MSVC' }}
@@ -94,14 +95,14 @@ jobs:
           wine ./target/x86_64-pc-windows-msvc/debug/instruction_set_support.exe --quiet
       working-directory: ./tools/instruction_set_support
     # Default tests plus Rayon and RustCrypto trait implementations.
-    - run: ${{ matrix.target.cargo_test }} --features=rayon,traits-preview
+    - run: ${{ matrix.target.cargo_cmd }}test --features=rayon,traits-preview
     # Same but with only one thread in the Rayon pool. This can find deadlocks.
     - name: "again with RAYON_NUM_THREADS=1"
-      run: ${{ matrix.target.cargo_test }} --features=rayon,traits-preview
+      run: ${{ matrix.target.cargo_cmd }}test --features=rayon,traits-preview
       env:
         RAYON_NUM_THREADS: 1
     # no_std tests.
-    - run: ${{ matrix.target.cargo_test }} --no-default-features
+    - run: ${{ matrix.target.cargo_cmd }}test --no-default-features
 
     # A matrix of different test settings:
     # - debug vs release
@@ -109,71 +110,71 @@ jobs:
     # - different levels of SIMD support
     #
     # Full SIMD support.
-    - run: ${{ matrix.target.cargo_test }} --features=
-    - run: ${{ matrix.target.cargo_test }} --features=prefer_intrinsics
-    - run: ${{ matrix.target.cargo_test }} --features=pure
-    - run: ${{ matrix.target.cargo_test }} --features= --release
-    - run: ${{ matrix.target.cargo_test }} --features=prefer_intrinsics --release
-    - run: ${{ matrix.target.cargo_test }} --features=pure --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=
+    - run: ${{ matrix.target.cargo_cmd }}test --features=prefer_intrinsics
+    - run: ${{ matrix.target.cargo_cmd }}test --features=pure
+    - run: ${{ matrix.target.cargo_cmd }}test --features= --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=prefer_intrinsics --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=pure --release
     # No AVX-512.
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,prefer_intrinsics
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,pure
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512 --release
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,prefer_intrinsics --release
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,pure --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,prefer_intrinsics
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,pure
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512 --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,prefer_intrinsics --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,pure --release
     # No AVX2.
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,prefer_intrinsics
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,pure
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2 --release
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,prefer_intrinsics --release
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,pure --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,prefer_intrinsics
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,pure
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2 --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,prefer_intrinsics --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,pure --release
     # No SSE4.1
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,prefer_intrinsics
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,pure
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41 --release
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,prefer_intrinsics --release
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,pure --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,prefer_intrinsics
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,pure
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41 --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,prefer_intrinsics --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,pure --release
     # No SSE2
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,no_sse2
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,no_sse2,prefer_intrinsics
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,no_sse2,pure
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,no_sse2 --release
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,no_sse2,prefer_intrinsics --release
-    - run: ${{ matrix.target.cargo_test }} --features=no_avx512,no_avx2,no_sse41,no_sse2,pure --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,no_sse2
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,no_sse2,prefer_intrinsics
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,no_sse2,pure
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,no_sse2 --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,no_sse2,prefer_intrinsics --release
+    - run: ${{ matrix.target.cargo_cmd }}test --features=no_avx512,no_avx2,no_sse41,no_sse2,pure --release
 
     # Test benchmarks. RUSTC_BOOTSTRAP=1 lets this run on non-nightly toolchains.
-    - run: ${{ matrix.target.cargo_test }} --benches --features=rayon
+    - run: ${{ matrix.target.cargo_cmd }}test --benches --features=rayon
       env:
         RUSTC_BOOTSTRAP: 1
     # Test vectors.
     - name: test vectors
-      run: ${{ matrix.target.cargo_test }}
+      run: ${{ matrix.target.cargo_cmd }}test
       working-directory: ./test_vectors
     - name: test vectors intrinsics
-      run: ${{ matrix.target.cargo_test }} --features=prefer_intrinsics
+      run: ${{ matrix.target.cargo_cmd }}test --features=prefer_intrinsics
       working-directory: ./test_vectors
     - name: test vectors pure
-      run: ${{ matrix.target.cargo_test }} --features=pure
+      run: ${{ matrix.target.cargo_cmd }}test --features=pure
       working-directory: ./test_vectors
     # Test b3sum.
     - name: test b3sum
-      run: ${{ matrix.target.cargo_test }}
+      run: ${{ matrix.target.cargo_cmd }}test
       working-directory: ./b3sum
     - name: test b3sum --no-default-features
-      run: ${{ matrix.target.cargo_test }} --no-default-features
+      run: ${{ matrix.target.cargo_cmd }}test --no-default-features
       working-directory: ./b3sum
     # Test C code.
-    - name: ${{ matrix.target.cargo_test }} C bindings assembly
-      run: ${{ matrix.target.cargo_test }}
+    - name: test C bindings assembly
+      run: ${{ matrix.target.cargo_cmd }}test
       working-directory: ./c/blake3_c_rust_bindings
-    - name: ${{ matrix.target.cargo_test }} C bindings intrinsics
+    - name: test C bindings intrinsics
       if: ${{ matrix.target.name != 'Linux - Windows MSVC' }}
-      run: ${{ matrix.target.cargo_test }} --features=prefer_intrinsics
+      run: ${{ matrix.target.cargo_cmd }}test --features=prefer_intrinsics
       working-directory: ./c/blake3_c_rust_bindings
     # Reference impl doc test.
     - name: reference impl doc test
-      run: ${{ matrix.target.cargo_test }}
+      run: ${{ matrix.target.cargo_cmd }}test
       working-directory: ./reference_impl
